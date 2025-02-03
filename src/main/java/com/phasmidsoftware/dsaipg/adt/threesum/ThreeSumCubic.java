@@ -4,6 +4,7 @@
 
 package com.phasmidsoftware.dsaipg.adt.threesum;
 
+import com.phasmidsoftware.dsaipg.util.Stopwatch;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -47,4 +48,17 @@ class ThreeSumCubic implements ThreeSum {
 
     private final int[] a;
     private final int length;
+
+    public static void main(String[] args) {
+        IntGenerator intGenerator = new IntGenerator();
+        int[] arrayLength = new int[]{2000, 4000, 6000, 8000, 10000};
+        for (int l: arrayLength) {
+            int[] nums = intGenerator.generator(l);
+            try (Stopwatch target = new Stopwatch()) {
+                ThreeSumCubic threeSumCubic = new ThreeSumCubic(nums);
+                threeSumCubic.getTriples();
+                System.out.println("ThreeSumCubic time spends in length " + l + ": " + target.lap() + "ms");
+            }
+        }
+    }
 }

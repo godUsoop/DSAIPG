@@ -4,6 +4,7 @@
 
 package com.phasmidsoftware.dsaipg.adt.threesum;
 
+import com.phasmidsoftware.dsaipg.util.Stopwatch;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -42,6 +43,7 @@ class ThreeSumQuadrithmic implements ThreeSum {
      */
     public Triple[] getTriples() {
         List<Triple> triples = new ArrayList<>();
+        Arrays.sort(a);
         for (int i = 0; i < length; i++)
             for (int j = i + 1; j < length; j++) {
                 Triple triple = getTriple(i, j);
@@ -61,11 +63,36 @@ class ThreeSumQuadrithmic implements ThreeSum {
      * or {@code null} if no such triple can be found.
      */
     Triple getTriple(int i, int j) {
-        // TO BE IMPLEMENTED  : use binary search to find the third element
-        // END SOLUTION
+        int l = j + 1;
+        int r = a.length - 1;
+        while (l <= r) {
+            int m = l + (r - l) / 2;
+            int threeSum = a[i] + a[j] + a[m];
+            if (threeSum > 0) {
+                r = m - 1;
+            } else if (threeSum < 0) {
+                l = m + 1;
+            } else {
+                return new Triple(a[i], a[j], a[m]);
+            }
+        }
         return null;
     }
 
     private final int[] a;
     private final int length;
+
+    public static void main(String[] args) {
+        IntGenerator intGenerator = new IntGenerator();
+        int[] arrayLength = new int[]{2000, 4000, 6000, 8000, 10000};
+        for (int l: arrayLength) {
+            int[] nums = intGenerator.generator(l);
+            Arrays.sort(nums);
+            try (Stopwatch target = new Stopwatch()) {
+                ThreeSumQuadrithmic threeSumQuadrithmic = new ThreeSumQuadrithmic(nums);
+                threeSumQuadrithmic.getTriples();
+                System.out.println("ThreeSumQuadrithmic time spent: " + target.lap() + "ms");
+            }
+        }
+    }
 }

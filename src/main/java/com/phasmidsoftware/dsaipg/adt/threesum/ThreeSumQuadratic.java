@@ -4,7 +4,10 @@
 
 package com.phasmidsoftware.dsaipg.adt.threesum;
 
+import com.phasmidsoftware.dsaipg.util.Stopwatch;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -49,10 +52,36 @@ public class ThreeSumQuadratic implements ThreeSum {
      */
      List<Triple> getTriples(int j) {
          List<Triple> triples = new ArrayList<>();
-        // TO BE IMPLEMENTED  : for each candidate, test if a[i] + a[j] + a[k] = 0.
-throw new RuntimeException("implementation missing");
+         int l = j - 1;
+         int r = j + 1;
+         while (l >= 0 && r < a.length) {
+             int threeSum = a[l] + a[j] + a[r];
+             if (threeSum > 0) {
+                 l--;
+             } else if (threeSum < 0) {
+                 r++;
+             } else {
+                 triples.add(new Triple(a[l], a[j], a[r]));
+                 l--;
+             }
+         }
+         return triples;
     }
 
     private final int[] a;
     private final int length;
+
+    public static void main(String[] args) {
+        IntGenerator intGenerator = new IntGenerator();
+        int[] arrayLength = new int[]{2000, 4000, 6000, 8000, 10000};
+        for (int l: arrayLength) {
+            int[] nums = intGenerator.generator(l);
+            Arrays.sort(nums);
+            try (Stopwatch target = new Stopwatch()) {
+                ThreeSumQuadratic threeSumQuadratic = new ThreeSumQuadratic(nums);
+                threeSumQuadratic.getTriples();
+                System.out.println("ThreeSumQuadratic time spends in length " + l + ": " + target.lap() + "ms");
+            }
+        }
+    }
 }
