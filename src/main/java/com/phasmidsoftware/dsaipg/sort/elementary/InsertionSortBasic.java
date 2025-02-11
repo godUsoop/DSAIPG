@@ -65,8 +65,11 @@ public class InsertionSortBasic<S> {
      * @param i    the index of the transitional element.
      */
     void insert(S[] a, int from, int i) {
-        // TO BE IMPLEMENTED  : implement inner loop of insertion sort using comparator
-        // END SOLUTION
+        for (int j = i; j > from; j--) {
+            while (comparator.compare(a[j - 1], a[j]) > 0) {
+                swap(a, j - 1, j);
+            }
+        }
     }
 
     private void swap(Object[] a, int j, int i) {
