@@ -219,7 +219,7 @@ public class PriorityQueue<K> implements Iterable<K> {
      *          It takes two indices (parent and child) and returns true if the parent satisfies the heap property relative to the child.
      * @return the final position of the element originally at index k after reorganization.
      */
-    private int doHeapify(int k, BiPredicate<Integer, Integer> p) {
+    protected int doHeapify(int k, BiPredicate<Integer, Integer> p) {
         int i = k;
         while (firstChild(i) <= last + first - 1) {
             int j = firstChild(i);
@@ -234,7 +234,7 @@ public class PriorityQueue<K> implements Iterable<K> {
     /**
      * Exchange the values at indices i and j
      */
-    private void swap(int i, int j) {
+    protected void swap(int i, int j) {
         K tmp = binHeap[i];
         binHeap[i] = binHeap[j];
         binHeap[j] = tmp;
@@ -243,7 +243,7 @@ public class PriorityQueue<K> implements Iterable<K> {
     /**
      * Get the index of the parent of the element at index k
      */
-    private int parent(int k) {
+    protected int parent(int k) {
         return (k + 1 - first) / 2 + first - 1;
     }
 
@@ -251,7 +251,7 @@ public class PriorityQueue<K> implements Iterable<K> {
      * Get the index of the first child of the element at index k.
      * The index of the second child will be one greater than the result.
      */
-    private int firstChild(int k) {
+    protected int firstChild(int k) {
         return (k + 1 - first) * 2 + first - 1;
     }
 
@@ -270,10 +270,10 @@ public class PriorityQueue<K> implements Iterable<K> {
     }
 
     private final boolean max;
-    private final int first;
+    protected final int first;
     private final Comparator<K> comparator;
     private final K[] binHeap; // binHeap[i] is ith element of binary heap (first element is reserved)
-    private int last; // number of elements in the binary heap
+    protected int last; // number of elements in the binary heap
     private final boolean floyd; //Determine whether floyd's snake method is on or off inside the take method
 
     public static void main(String[] args) {
