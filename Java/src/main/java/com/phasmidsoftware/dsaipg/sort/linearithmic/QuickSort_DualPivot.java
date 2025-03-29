@@ -1,13 +1,17 @@
 package com.phasmidsoftware.dsaipg.sort.linearithmic;
 
 import com.phasmidsoftware.dsaipg.sort.generic.SortException;
+import com.phasmidsoftware.dsaipg.sort.generic.SortWithHelper;
 import com.phasmidsoftware.dsaipg.sort.helper.Helper;
 import com.phasmidsoftware.dsaipg.util.config.Config;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import static com.phasmidsoftware.dsaipg.sort.helper.InstrumentedComparatorHelper.getRunsConfig;
+import static com.phasmidsoftware.dsaipg.util.config.Config_Benchmark.setupConfig;
 
 /**
  * Class QuickSort_DualPivot which extends QuickSort.
@@ -168,5 +172,44 @@ public class QuickSort_DualPivot<X extends Comparable<X>> extends QuickSort<X> {
         }
 
         private final Helper<X> helper;
+    }
+
+    public static void main(String[] args) throws IOException {
+        int[] sizes = {10000, 20000, 40000, 80000, 160000, 256000};
+        long seed = 123;
+
+        final Config config = setupConfig("true", "false", "123", "0", "1", "");
+        for (int size : sizes) {
+            Integer[] data = generateArray(size, seed);
+
+            SortWithHelper<Integer> sorter = new QuickSort_DualPivot<>(data.length, 1, config);
+            Helper<Integer> helper = sorter.getHelper();
+            sorter.sort(data);
+            System.out.println("swaps: " + helper.getSwaps());
+            System.out.println("compares: " + helper.getCompares());
+            System.out.println("copies: " + helper.getCopies());
+            System.out.println("hits: " + helper.getHits());
+            System.out.println("lookup: " + helper.getLookups());
+            System.out.println();
+        }
+
+        final Config noInstrumenting = setupConfig("false", "false", "123", "0", "1", "");
+        for (int size : sizes) {
+            Integer[] data = generateArray(size, seed);
+            SortWithHelper<Integer> sorter = new QuickSort_DualPivot<>(data.length, 1, noInstrumenting);
+            long start = System.currentTimeMillis();
+            sorter.sort(data);
+            long duration = System.currentTimeMillis() - start;
+            System.out.println("time spend: " + duration);
+        }
+    }
+
+    private static Integer[] generateArray(int size, long seed) {
+        Random random = new Random(seed);
+        Integer[] data = new Integer[size];
+        for (int i = 0; i < size; i++) {
+            data[i] = random.nextInt(0, 2000000);
+        }
+        return data;
     }
 }

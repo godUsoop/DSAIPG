@@ -1,8 +1,14 @@
 package com.phasmidsoftware.dsaipg.sort.elementary;
 
 import com.phasmidsoftware.dsaipg.sort.generic.SortWithComparableHelper;
+import com.phasmidsoftware.dsaipg.sort.generic.SortWithHelper;
 import com.phasmidsoftware.dsaipg.sort.helper.Helper;
 import com.phasmidsoftware.dsaipg.util.config.Config;
+
+import java.io.IOException;
+import java.util.Random;
+
+import static com.phasmidsoftware.dsaipg.util.config.Config_Benchmark.setupConfig;
 
 /**
  * Implementation of the Heap Sort algorithm for sorting an array of elements that implement the Comparable interface.
@@ -126,5 +132,44 @@ public class HeapSort<X extends Comparable<X>> extends SortWithComparableHelper<
     }
 
     public static final String DESCRIPTION = "Heap Sort";
+
+    public static void main(String[] args) throws IOException {
+        int[] sizes = {10000, 20000, 40000, 80000, 160000, 256000};
+        long seed = 123;
+
+        final Config config = setupConfig("true", "false", "123", "0", "1", "");
+        for (int size : sizes) {
+            Integer[] data = generateArray(size, seed);
+
+            SortWithHelper<Integer> sorter = new HeapSort<>(data.length, 1, config);
+            Helper<Integer> helper = sorter.getHelper();
+            sorter.sort(data);
+            System.out.println("swaps: " + helper.getSwaps());
+            System.out.println("compares: " + helper.getCompares());
+            System.out.println("copies: " + helper.getCopies());
+            System.out.println("hits: " + helper.getHits());
+            System.out.println("lookup: " + helper.getLookups());
+            System.out.println();
+        }
+
+        final Config noInstrumenting = setupConfig("false", "false", "123", "0", "1", "");
+        for (int size : sizes) {
+            Integer[] data = generateArray(size, seed);
+            SortWithHelper<Integer> sorter = new HeapSort<>(data.length, 1, noInstrumenting);
+            long start = System.currentTimeMillis();
+            sorter.sort(data);
+            long duration = System.currentTimeMillis() - start;
+            System.out.println("time spend: " + duration);
+        }
+    }
+
+    private static Integer[] generateArray(int size, long seed) {
+        Random random = new Random(seed);
+        Integer[] data = new Integer[size];
+        for (int i = 0; i < size; i++) {
+            data[i] = random.nextInt(0, 2000000);
+        }
+        return data;
+    }
 
 }

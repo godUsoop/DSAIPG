@@ -3,10 +3,13 @@ package com.phasmidsoftware.dsaipg.sort.linearithmic;
 import com.phasmidsoftware.dsaipg.sort.elementary.InsertionSort;
 import com.phasmidsoftware.dsaipg.sort.generic.SortException;
 import com.phasmidsoftware.dsaipg.sort.generic.SortWithComparableHelper;
+import com.phasmidsoftware.dsaipg.sort.generic.SortWithHelper;
 import com.phasmidsoftware.dsaipg.sort.helper.Helper;
 import com.phasmidsoftware.dsaipg.util.config.Config;
 
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Random;
 
 import static com.phasmidsoftware.dsaipg.util.config.Config_Benchmark.*;
 
@@ -143,9 +146,40 @@ public class MergeSort<X extends Comparable<X>> extends SortWithComparableHelper
             insertionSort.sort(a, from, to);
             return;
         }
-
         // TO BE IMPLEMENTED  : implement merge sort with insurance and no-copy optimizations
-throw new RuntimeException("implementation missing");
+        int mid = from + (to - from) / 2;
+
+        if (noCopy) {
+            noCopyMerge(a, aux, from, mid, to, insurance);
+        } else {
+            regularMerge(a, aux, from, mid, to, insurance);
+        }
+    }
+
+    private void noCopyMerge(X[] a, X[] aux, int from, int mid, int to, boolean insurance) {
+        System.arraycopy(a, from, aux, from, to - from);
+
+        sort(aux, a, from, mid);
+        sort(aux, a, mid, to);
+
+        if (insurance && helper.compare(aux[mid - 1], aux[mid]) <= 0) {
+            System.arraycopy(aux, from, a, from, to - from);
+            return;
+        }
+
+        merge(aux, a, from, mid, to);
+    }
+
+    private void regularMerge(X[] a, X[] aux, int from, int mid, int to, boolean insurance) {
+        sort(a, aux, from, mid);
+        sort(a, aux, mid, to);
+
+        if (insurance && helper.compare(a[mid - 1], a[mid]) <= 0) {
+            return;
+        }
+
+        merge(a, aux, from, mid, to);
+        System.arraycopy(aux, from, a, from, to - from);
     }
 
     /**
@@ -211,4 +245,43 @@ throw new RuntimeException("implementation missing");
     private int arrayMemory = -1;
     private int additionalMemory;
     private int maxMemory;
+
+    public static void main(String[] args) throws IOException {
+        int[] sizes = {10000, 20000, 40000, 80000, 160000, 256000};
+        long seed = 123;
+
+        final Config config = setupConfig("true", "false", "123", "0", "1", "");
+        for (int size : sizes) {
+            Integer[] data = generateArray(size, seed);
+
+            SortWithHelper<Integer> sorter = new MergeSort<>(data.length, 1, config);
+            Helper<Integer> helper = sorter.getHelper();
+            sorter.sort(data);
+            System.out.println("swaps: " + helper.getSwaps());
+            System.out.println("compares: " + helper.getCompares());
+            System.out.println("copies: " + helper.getCopies());
+            System.out.println("hits: " + helper.getHits());
+            System.out.println("lookup: " + helper.getLookups());
+            System.out.println();
+        }
+
+        final Config noInstrumenting = setupConfig("false", "false", "123", "0", "1", "");
+        for (int size : sizes) {
+            Integer[] data = generateArray(size, seed);
+            SortWithHelper<Integer> sorter = new MergeSort<>(data.length, 1, noInstrumenting);
+            long start = System.currentTimeMillis();
+            sorter.sort(data);
+            long duration = System.currentTimeMillis() - start;
+            System.out.println("time spend: " + duration);
+        }
+    }
+
+    private static Integer[] generateArray(int size, long seed) {
+        Random random = new Random(seed);
+        Integer[] data = new Integer[size];
+        for (int i = 0; i < size; i++) {
+            data[i] = random.nextInt(0, 2000000);
+        }
+        return data;
+    }
 }
